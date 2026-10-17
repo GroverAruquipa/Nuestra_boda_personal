@@ -1,57 +1,29 @@
-# Nuestra boda
+# Notre mariage · Grover & Laura
 
-Sitio privado para planear la boda a distancia: tareas, invitados, proveedores, ideas y preguntas, cronograma del día, dos relojes (uno por ciudad), cuenta regresiva y el botón de abrazos.
+Site privé pour préparer le mariage à distance : tâches, invités, fournisseurs, idées et questions, déroulement du jour J, deux horloges (une par ville), compte à rebours et bouton de câlins.
 
-Es un solo archivo, `index.html`. Funciona en GitHub Pages sin servidor.
+Le site est en français par défaut ; le bouton FR · ES · EN change la langue.
 
-## 1. Publicarlo en GitHub Pages (10 minutos)
+## Publication (GitHub Pages)
 
-1. En GitHub, crea un repositorio nuevo, por ejemplo `boda`.
-2. Sube `index.html`, `firestore.rules` y este `README.md`.
-3. En el repositorio: **Settings → Pages → Build and deployment → Source: Deploy from a branch**, rama `main`, carpeta `/ (root)`. Guarda.
-4. En uno o dos minutos el sitio queda en `https://TU-USUARIO.github.io/boda/`.
+Dans le dépôt : **Settings → Pages → Build and deployment → Source : Deploy from a branch**, branche `main`, dossier `/ (root)`, puis **Save**. Le site est à `https://groveraruquipa.github.io/Nuestra_boda_personal/`.
 
-Sin el paso 2 de abajo, cada uno ve solo lo que guarda en su propio navegador.
+Sans la synchronisation ci-dessous, chacun voit seulement ce qu'il enregistre dans son propre navigateur.
 
-## 2. Que los dos vean lo mismo (Firebase, gratis)
+## Voir les mêmes données à deux (Firebase, gratuit)
 
-GitHub Pages solo sirve archivos; para compartir los datos en tiempo real se usa Firestore, con el plan gratuito de Firebase.
+1. Créer un projet sur <https://console.firebase.google.com>.
+2. **Authentication → Sign-in method → Google → Enable**, et ajouter `groveraruquipa.github.io` dans **Authorized domains**.
+3. **Firestore Database → Create database** (mode production, région `northamerica-northeast1`, Montréal).
+4. Dans **Rules**, coller `firestore.rules` avec vos deux adresses Gmail, puis publier.
+5. **Project settings → Your apps → Web (`</>`)**, copier l'objet `firebaseConfig`.
+6. Dans `index.html`, remplacer `const FIREBASE_CONFIG = null;` par cet objet, puis pousser le changement.
 
-1. Entra a <https://console.firebase.google.com> y crea un proyecto (puedes desactivar Analytics).
-2. **Build → Authentication → Get started → Sign-in method → Google → Enable.**
-3. En **Authentication → Settings → Authorized domains**, añade `TU-USUARIO.github.io`.
-4. **Build → Firestore Database → Create database** (modo producción, región cercana, por ejemplo `northamerica-northeast1`, Montreal).
-5. En la pestaña **Rules** de Firestore, pega el contenido de `firestore.rules` con sus dos correos de Google, y publica.
-6. **Project settings (engranaje) → General → Your apps → Web (`</>`)**, registra la app y copia el objeto `firebaseConfig`.
-7. En `index.html`, busca `const FIREBASE_CONFIG = null;` y reemplázalo:
+La clé `apiKey` n'est pas secrète : ce sont les règles de l'étape 4 qui protègent les données. Si vous modifiez au même moment, la dernière modification enregistrée l'emporte.
 
-```js
-const FIREBASE_CONFIG = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
-```
+## Utilisation
 
-8. Sube el cambio a GitHub. Al abrir el sitio aparece "Iniciar sesión para sincronizar"; cada uno entra con su cuenta de Google.
-
-La clave `apiKey` de Firebase no es secreta: lo que protege los datos son las reglas del paso 5, que solo dejan entrar a sus dos correos.
-
-## Cómo se usa
-
-- **Soy …** (arriba): cada uno elige quién es en su teléfono. Así se marca quién hizo cada cosa.
-- **Ajustes**: nombres, ciudades, zonas horarias, fecha y lugar.
-- **Borrar ejemplos**: quita los invitados, proveedores, ideas y horarios de ejemplo.
-- **Enviar un abrazo**: la otra persona lo ve al abrir el sitio.
-- **ES · EN**: cambia el idioma de la interfaz.
-
-Si los dos editan exactamente al mismo segundo, gana el último cambio guardado.
-
-## Ideas para después
-
-- Fotos en el muro de ideas (Firebase Storage).
-- Página pública para invitados con RSVP, como en [rampatra/wedding-website](https://github.com/rampatra/wedding-website), que guarda las respuestas en Google Sheets.
-- Recordatorios por correo de tareas que se acercan.
+- **Je suis …** : chacun choisit qui il est sur son téléphone.
+- **Réglages** : noms, villes, fuseaux horaires, date (le jour est facultatif) et lieu.
+- **Effacer les exemples** : retire les invités, fournisseurs, idées et horaires d'exemple.
+- Touchez une photo pour l'agrandir.
