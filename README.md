@@ -21,6 +21,13 @@ Sans la synchronisation ci-dessous, chacun voit seulement ce qu'il enregistre da
 
 La clé `apiKey` n'est pas secrète : ce sont les règles de l'étape 4 qui protègent les données. Si vous modifiez au même moment, la dernière modification enregistrée l'emporte.
 
+## Sur le téléphone (comme une application)
+
+- **iPhone** : ouvrir le site dans Safari, toucher le bouton Partager, puis « Sur l'écran d'accueil ».
+- **Android** : ouvrir le site dans Chrome, menu ⋮, puis « Installer l'application ».
+
+L'icône s'ajoute à l'écran d'accueil, l'application s'ouvre en plein écran avec une barre d'onglets en bas, et elle fonctionne même sans connexion.
+
 ## Utilisation
 
 - **Je suis …** : chacun choisit qui il est sur son téléphone.

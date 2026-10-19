@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Notre mariage</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2b1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Notre mariage">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Pinyon+Script&family=Caveat:wght@500;700&family=Karla:wght@400;500;600;700&display=swap">
@@ -166,7 +174,8 @@ button{cursor:pointer}
 .pn .dot{width:8px;height:8px}
 .pn .pt{outline:none;min-width:1ch}
 .pn .pt[contenteditable="true"],.pn .pt[contenteditable="plaintext-only"]{user-select:text;-webkit-user-select:text;cursor:text;background:#fff;color:var(--lav-ink);border-radius:6px;padding:0 4px}
-.paper.anim .pn,.paper.anim .pc{animation:fade .6s ease both}
+.paper.anim .pn,.paper.anim .pc{animation:pfade .7s ease both}
+@keyframes pfade{from{opacity:.01}to{opacity:1}}
 .hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
 .ilist li .indent{display:inline-block;flex:none}
 /* story: polaroids */
@@ -244,6 +253,35 @@ button{cursor:pointer}
 .tab[aria-selected="true"] .badge{background:var(--rose);color:var(--paper)}
 
 main{padding-block:26px 80px}
+/* phone app: bottom navigation */
+.bnav{display:none}
+.more{position:fixed;inset:0;z-index:55;background:rgba(20,8,18,.4);display:flex;align-items:flex-end;animation:fade .2s ease}
+.more .msheet{width:100%;background:var(--paper);border-radius:22px 22px 0 0;padding:10px 16px calc(84px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:4px}
+.more .grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.more button{display:flex;align-items:center;gap:14px;border:0;background:none;padding:13px 10px;border-radius:12px;font-size:16px;text-align:left;color:var(--ink)}
+.more button:hover,.more button[aria-current="true"]{background:var(--rose-soft)}
+.more svg{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.more .mnote{font-size:13.5px;color:var(--muted);padding:4px 10px 8px;line-height:1.45}
+@media (max-width:760px){
+  .tabs{display:none}
+  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:14px;font-size:11px;font-weight:600;color:var(--muted);min-height:52px}
+  .bnav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+  .bnav button[aria-current="true"]{color:var(--rose)}
+  .bnav button[aria-current="true"] svg{transform:translateY(-1px) scale(1.08)}
+  main{padding-block:18px calc(96px + env(safe-area-inset-bottom,0px))}
+  footer.footph{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .cover{min-height:clamp(320px,52vh,440px)}
+  .top #langBtn,.top #setBtn{display:none}
+  body:not(.t-home) .hero,body:not(.t-home) footer{display:none}
+  body:not(.t-home) main{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .bview{height:calc(100dvh - 300px);min-height:380px}
+  .btools button{padding:8px 13px;font-size:14px}
+  .task{padding-block:12px}
+  .chk{width:30px;height:30px}
+  .x{font-size:22px;padding:4px 8px}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+}
 .panel{animation:fade .45s ease}
 @keyframes fade{from{opacity:.01;transform:translateY(8px)}to{opacity:1;transform:none}}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,34px);margin:0;line-height:1.15;text-wrap:balance}
@@ -594,6 +632,8 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
 <div id="sheetRoot"></div>
 <div id="lbRoot"></div>
 <div class="toast" id="toast" role="status"></div>
+<nav class="bnav" id="bnav" aria-label="Sections"></nav>
+<div id="moreRoot"></div>
 
 <script>
 /* =========================================================
@@ -679,6 +719,9 @@ now:"now",mAgo:"{0} min ago",hAgo:"{0} h ago",dAgo:"{0} d ago",
 m12:"12+ months before",mN:"{0} months before",m1:"1 month before",w2:"2 weeks before",w1:"1 week before",after:"After",
 nothing:"Nothing here yet.",allDone:"Everything on this list is done!"}
 };
+Object.assign(T.fr,{more:"Plus",langL:"Langue",install:"Installer sur le téléphone",installIOS:"Sur iPhone : dans Safari, touchez le bouton Partager, puis « Sur l'écran d'accueil ».",installOther:"Ouvrez le menu du navigateur (⋮), puis « Installer l'application » ou « Ajouter à l'écran d'accueil »."});
+Object.assign(T.es,{more:"Más",langL:"Idioma",install:"Instalar en el teléfono",installIOS:"En iPhone: en Safari, toca el botón Compartir y luego « Agregar a inicio ».",installOther:"Abre el menú del navegador (⋮) y elige « Instalar aplicación » o « Agregar a la pantalla principal »."});
+Object.assign(T.en,{more:"More",langL:"Language",install:"Install on the phone",installIOS:"On iPhone: in Safari, tap the Share button, then “Add to Home Screen”.",installOther:"Open the browser menu (⋮), then “Install app” or “Add to Home screen”."});
 Object.assign(T.fr,{modeDraw:"Comme sur le papier",modeList:"En liste",mapSdraw:"Notre dessin, en version vivante. Glissez un thème ou une idée pour le déplacer ; ses idées suivent.",drawHint:"Touchez une idée pour la sélectionner, touchez-la encore pour la modifier. Double-cliquez sur le papier pour créer un thème à cet endroit.",
 addChild:"+ Ajouter une idée",editTxt:"Modifier",delSure:"Oui, supprimer",recenter:"Recentrer",newBranch:"Nouveau thème",newIdea:"Nouvelle idée"});
 Object.assign(T.es,{modeDraw:"Como en el papel",modeList:"En lista",mapSdraw:"Nuestro dibujo, en versión viva. Arrastra un tema o una idea para moverlo; sus ideas lo siguen.",drawHint:"Toca una idea para seleccionarla y tócala otra vez para cambiarla. Haz doble clic en el papel para crear un tema ahí.",
@@ -919,7 +962,23 @@ function floatHearts(el){
    7. PANELS
    ========================================================= */
 const TABS=[["home","home"],["map","map"],["tasks","tasks"],["guests","guests"],["vendors","vendors"],["ideas","ideas"],["day","day"]];
+const ICO={home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
+map:'<circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5" r="1.8"/><circle cx="19.5" cy="5" r="1.8"/><circle cx="4.5" cy="19" r="1.8"/><circle cx="19.5" cy="19" r="1.8"/><path d="M9.8 10 6 6.3M14.2 10 18 6.3M9.8 14 6 17.7M14.2 14 18 17.7"/>',
+tasks:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 5-6"/>',
+guests:'<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.5 14.3c2.4-.4 4.3 1.2 5 4.2"/>',
+more:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+vendors:'<path d="M4 9h16l-1 11H5L4 9z"/><path d="M8.5 9V7a3.5 3.5 0 0 1 7 0v2"/>',
+ideas:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.3 1 2.2h5.2c0-.9.4-1.7 1-2.2A6 6 0 0 0 12 3z"/>',
+day:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.2 7.5l2 1.2M17.8 15.3l2 1.2M4.2 16.5l2-1.2M17.8 8.7l2-1.2"/>',
+lang:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/>',
+install:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 8v6M9.5 11.5 12 14l2.5-2.5"/>'};
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+const BNAV=["home","map","tasks","guests"],MORE=["vendors","ideas","day"];
 function renderTabs(){
+  document.body.className=document.body.className.replace(/\bt-\S+/g,"").trim()+" t-"+tab;
+  $("bnav").innerHTML=BNAV.map(k=>`<button type="button" data-go="${k}" aria-current="${tab===k}">${ico(k)}<span>${t(k)}</span></button>`).join("")+
+    `<button type="button" data-go="more" aria-current="${MORE.includes(tab)}">${ico("more")}<span>${t("more")}</span></button>`;
   const open=S.tasks.filter(x=>!x.done).length;
   const qs=S.ideas.filter(i=>i.k==="q"&&i.by!==me&&!i.ans.length).length;
   $("tabs").innerHTML=TABS.map(([k,l])=>{const b="";
@@ -1184,8 +1243,32 @@ function softRender(){if(!editing())renderAll()}
 /* =========================================================
    8. EVENTS
    ========================================================= */
-$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;tab=b.dataset.tab;try{history.replaceState(null,"","#"+tab)}catch(_){}renderTabs();if(tab==="map"){ui.mapAnim=true;ui.paperAnim=true;renderMapMode();renderMap();renderPaper();if(!ui.centered){recenter();ui.centered=true}makeEditable()}
-  const top=document.querySelector(".tabs").getBoundingClientRect().top+scrollY;if(scrollY>top)scrollTo({top,behavior:reduce?"auto":"smooth"})});
+const isPhone=()=>matchMedia("(max-width:760px)").matches;
+function goTab(k){tab=k;try{history.replaceState(null,"","#"+tab)}catch(_){}closeMore();renderTabs();
+  if(tab==="map"){ui.mapAnim=true;ui.paperAnim=true;renderMapMode();renderMap();renderPaper();if(!ui.centered){recenter();ui.centered=true}makeEditable()}
+  if(isPhone()){scrollTo({top:0})}else{const top=document.querySelector(".tabs").getBoundingClientRect().top+scrollY;if(scrollY>top)scrollTo({top,behavior:reduce?"auto":"smooth"})}}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)goTab(b.dataset.tab)});
+$("bnav").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(!b)return;if(b.dataset.go==="more")openMore();else goTab(b.dataset.go)});
+/* "Plus" sheet + install */
+let installEvt=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e});
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function openMore(note){
+  $("moreRoot").innerHTML=`<div class="more" id="moreScrim"><div class="msheet" role="dialog" aria-modal="true" aria-label="${esc(t("more"))}"><div class="grab"></div>
+    ${MORE.map(k=>`<button type="button" data-mgo="${k}" aria-current="${tab===k}">${ico(k)}${t(k)}</button>`).join("")}
+    <button type="button" data-mgo="settings">${ico("settings")}${t("settings")}</button>
+    <button type="button" data-mgo="lang">${ico("lang")}${t("langL")} · ${["fr","es","en"].map(l=>l===lang?`<b>${l.toUpperCase()}</b>`:l.toUpperCase()).join(" ")}</button>
+    ${standalone()?"":`<button type="button" data-mgo="install">${ico("install")}${t("install")}</button>`}
+    ${note?`<p class="mnote">${esc(note)}</p>`:""}</div></div>`;
+  $("moreScrim").onclick=e=>{if(e.target.id==="moreScrim"){closeMore();return}const b=e.target.closest("[data-mgo]");if(!b)return;const k=b.dataset.mgo;
+    if(MORE.includes(k))goTab(k);
+    else if(k==="settings"){closeMore();openSettings()}
+    else if(k==="lang"){lang={fr:"es",es:"en",en:"fr"}[lang]||"fr";ls.set("ow-lang2",lang);renderAll();openMore()}
+    else if(k==="install"){if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;closeMore()})}else openMore(isIOS()?t("installIOS"):t("installOther"))}};
+}
+function closeMore(){$("moreRoot").innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("moreRoot").innerHTML)closeMore()});
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 $("langBtn").onclick=()=>{lang={fr:"es",es:"en",en:"fr"}[lang]||"fr";ls.set("ow-lang2",lang);renderAll()};
 $("meBtn").onclick=()=>{me=other(me);meChosen=true;ls.set("ow-me",me);renderAll();toast(t("iAm",nm(me)))};
 $("hugBtn").onclick=e=>{S.hugs[me]++;S.hugs.last={by:me,ts:Date.now()};log("hug");commit();floatHearts(e.currentTarget);toast(t("hugSent",nm(other(me))))};
