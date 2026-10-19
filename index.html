@@ -6,7 +6,7 @@
 <title>Notre mariage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Pinyon+Script&family=Karla:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Pinyon+Script&family=Caveat:wght@500;700&family=Karla:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: romantic hero (names in script, an arc joining the two cities with a heart travelling along it, two live clocks, countdown),
    then a sticky tab bar over six panels: Home, Tasks, Guests, Vendors, Ideas, The day. */
@@ -134,6 +134,41 @@ button{cursor:pointer}
 .bcard form input{flex:1 1 200px;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 11px}
 .danger2{border:0;background:none;color:var(--muted);font-size:13px;padding:4px 6px;border-radius:8px}
 .danger2:hover,.danger2.arm{color:var(--rose);background:var(--rose-soft)}
+/* drawn idea map (like the paper) */
+:root{--lav:#dcc3ec;--lav-2:#cfb0e3;--lav-ink:#38295c;--lav-line:rgba(56,41,92,.55);--lav-pink:#c9408a;--hand:"Caveat","Segoe Print","Bradley Hand",cursive}
+.btools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;min-height:38px}
+.btools button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 13px;font-size:13.5px}
+.btools button:hover{border-color:var(--rose)}
+.btools button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btools button.arm{background:var(--rose-soft);color:var(--rose);border-color:var(--rose)}
+.btools .sep{flex:1}
+.btools .selname{font-family:var(--hand);font-size:22px;line-height:1;color:var(--ink);padding:0 6px;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bview{position:relative;height:min(68vh,660px);overflow:auto;border-radius:18px;box-shadow:0 2px 6px rgba(40,10,60,.12),0 18px 40px rgba(40,10,60,.16);background:var(--lav);overscroll-behavior:contain;cursor:grab}
+.bview.panning{cursor:grabbing}
+.bsize{position:relative}
+.paper{position:absolute;left:0;top:0;width:1900px;height:1320px;transform-origin:0 0;
+  background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.1),transparent 40%),radial-gradient(circle at 80% 70%,rgba(120,60,160,.06),transparent 45%),
+  repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 6px),var(--lav);color:var(--lav-ink);font-family:var(--hand)}
+.paper svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.paper svg path{fill:none;stroke:var(--lav-line);stroke-width:1.7;stroke-linecap:round}
+.paper svg path.l1{stroke-width:2.2}
+.paper svg.anim path{stroke-dasharray:500;animation:drawl 1.2s ease both}
+.pc{position:absolute;transform:translate(-50%,-50%);font-family:var(--hand);font-weight:700;font-size:54px;color:var(--lav-pink);padding:10px 34px 14px;border:2.5px solid var(--lav-pink);border-radius:44% 56% 52% 48% / 58% 44% 56% 42%;background:rgba(255,255,255,.22);white-space:nowrap;user-select:none;z-index:3}
+.pn{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.05;padding:3px 8px;border-radius:12px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;z-index:2;display:flex;align-items:center;gap:6px;transition:background .15s,box-shadow .15s}
+.pn.a-l{transform:translate(0,-50%)}.pn.a-r{transform:translate(-100%,-50%);flex-direction:row-reverse}
+.pn:hover{background:rgba(255,255,255,.28)}
+.pn.dragging{cursor:grabbing;background:rgba(255,255,255,.45);box-shadow:0 8px 20px rgba(56,41,92,.25);z-index:5}
+.pn.sel{background:rgba(255,255,255,.55);box-shadow:0 0 0 2px var(--lav-pink);z-index:4}
+.pn.pb{font-size:30px;font-weight:700}
+.pn.pi{font-size:21px;font-weight:500}
+.pn.pi.s-q{color:#a02c6c}
+.pn.pi.s-ok{color:#2f6b55}
+.pn .dot{width:8px;height:8px}
+.pn .pt{outline:none;min-width:1ch}
+.pn .pt[contenteditable="true"],.pn .pt[contenteditable="plaintext-only"]{user-select:text;-webkit-user-select:text;cursor:text;background:#fff;color:var(--lav-ink);border-radius:6px;padding:0 4px}
+.paper.anim .pn,.paper.anim .pc{animation:fade .6s ease both}
+.hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
+.ilist li .indent{display:inline-block;flex:none}
 /* story: polaroids */
 .story{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:center;margin-bottom:34px}
 .story .kicker{margin-top:0}
@@ -471,11 +506,18 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
 
   <!-- MAP -->
   <section class="panel" data-panel="map" id="p-map" hidden>
-    <div class="head"><h2 data-i18n="mapT"></h2><button class="ghost" type="button" data-act="addbranch" data-i18n="addBranch"></button></div>
-    <p class="sub" data-i18n="mapS"></p>
-    <div class="legend" id="legend"></div>
-    <div class="mm" id="mm"></div>
-    <div id="branchCard"></div>
+    <div class="head"><h2 data-i18n="mapT"></h2><div class="typet" id="mmode"></div></div>
+    <p class="sub" id="mapSub"></p>
+    <div id="drawView">
+      <div class="btools" id="btools"></div>
+      <div class="bview" id="bview"><div class="bsize" id="bsize"><div class="paper" id="paper"></div></div></div>
+      <p class="hint" data-i18n="drawHint"></p>
+    </div>
+    <div id="listView" hidden>
+      <div class="head" style="margin-bottom:10px"><span class="legend" id="legend" style="margin:0"></span><button class="ghost" type="button" data-act="addbranch" data-i18n="addBranch"></button></div>
+      <div class="mm" id="mm"></div>
+      <div id="branchCard"></div>
+    </div>
   </section>
 
   <!-- TASKS -->
@@ -637,6 +679,12 @@ now:"now",mAgo:"{0} min ago",hAgo:"{0} h ago",dAgo:"{0} d ago",
 m12:"12+ months before",mN:"{0} months before",m1:"1 month before",w2:"2 weeks before",w1:"1 week before",after:"After",
 nothing:"Nothing here yet.",allDone:"Everything on this list is done!"}
 };
+Object.assign(T.fr,{modeDraw:"Comme sur le papier",modeList:"En liste",mapSdraw:"Notre dessin, en version vivante. Glissez un thème ou une idée pour le déplacer ; ses idées suivent.",drawHint:"Touchez une idée pour la sélectionner, touchez-la encore pour la modifier. Double-cliquez sur le papier pour créer un thème à cet endroit.",
+addChild:"+ Ajouter une idée",editTxt:"Modifier",delSure:"Oui, supprimer",recenter:"Recentrer",newBranch:"Nouveau thème",newIdea:"Nouvelle idée"});
+Object.assign(T.es,{modeDraw:"Como en el papel",modeList:"En lista",mapSdraw:"Nuestro dibujo, en versión viva. Arrastra un tema o una idea para moverlo; sus ideas lo siguen.",drawHint:"Toca una idea para seleccionarla y tócala otra vez para cambiarla. Haz doble clic en el papel para crear un tema ahí.",
+addChild:"+ Añadir una idea",editTxt:"Cambiar",delSure:"Sí, borrar",recenter:"Centrar",newBranch:"Nuevo tema",newIdea:"Nueva idea"});
+Object.assign(T.en,{modeDraw:"Like on paper",modeList:"As a list",mapSdraw:"Our drawing, brought to life. Drag a theme or an idea to move it; its ideas follow.",drawHint:"Tap an idea to select it, tap it again to change it. Double-click the paper to create a theme there.",
+addChild:"+ Add an idea",editTxt:"Edit",delSure:"Yes, delete",recenter:"Center",newBranch:"New theme",newIdea:"New idea"});
 Object.assign(T.fr,{map:"Notre carte",mapT:"Notre carte d'idées",mapS:"Tout ce qu'on a dessiné ensemble. Touchez un thème pour voir ses idées. Touchez une idée pour la modifier, et son étiquette pour changer son statut.",addBranch:"+ Nouveau thème",center:"Mariage",st_idea:"Idée",st_q:"À discuter",st_ok:"Décidé",ideaAddPh:"Nouvelle idée…",delBranch:"Supprimer ce thème",delBranchQ:"Oui, supprimer le thème",branchPh:"Nom du thème",
 prioT:"Nos priorités",prioS:"Dans l'ordre où on veut avancer. Touchez le numéro quand c'est fait, et les flèches pour changer l'ordre.",addPrio:"+ Ajouter",up:"Monter",down:"Descendre"});
 Object.assign(T.es,{map:"Nuestro mapa",mapT:"Nuestro mapa de ideas",mapS:"Todo lo que dibujamos juntos. Toca un tema para ver sus ideas. Toca una idea para cambiarla, y su etiqueta para cambiar su estado.",addBranch:"+ Nuevo tema",center:"Boda",st_idea:"Idea",st_q:"Por hablar",st_ok:"Decidido",ideaAddPh:"Nueva idea…",delBranch:"Borrar este tema",delBranchQ:"Sí, borrar el tema",branchPh:"Nombre del tema",
@@ -997,21 +1045,146 @@ function renderBranch(){
   $("branchCard").innerHTML=`<div class="bcard" data-id="${b.id}">
     <div class="bh"><span class="ed" data-edit="map:label" data-ph="${esc(t("branchPh"))}">${esc(b.label)}</span>
       <button class="danger2 ${ui.delB===b.id?"arm":""}" type="button" data-act="delbranch">${ui.delB===b.id?t("delBranchQ"):t("delBranch")}</button></div>
-    <ul class="ilist">${b.ideas.map(x=>`<li data-id="${x.id}"><button class="stb s-${x.st}" type="button" data-act="stcycle"><i class="dot d-${x.st}"></i>${t("st_"+x.st)}</button>
+    <ul class="ilist">${treeOrder(b).map(([x,dep])=>`<li data-id="${x.id}">${dep?`<span class="indent" style="width:${dep*18}px"></span>`:""}<button class="stb s-${x.st}" type="button" data-act="stcycle"><i class="dot d-${x.st}"></i>${t("st_"+x.st)}</button>
       <span class="itx"><span class="ed" data-edit="mapidea:text">${esc(x.text)}</span></span><button class="x" data-act="delmapidea" aria-label="${esc(t("del"))}">×</button></li>`).join("")||`<li class="empty">${t("nothing")}</li>`}</ul>
     <form data-act="addmapidea"><input placeholder="${esc(t("ideaAddPh"))}" aria-label="${esc(t("ideaAddPh"))}" required><button class="primary">${t("add")}</button></form>
   </div>`;
 }
+/* ---------- drawn map ---------- */
+const BW=1900,BH=1320,CX=950,CY=660;
+let POS=new Map(),ANC=new Map();
+const parentOf=(b,x)=>x.parent&&x.parent!==x.id&&b.ideas.some(y=>y.id===x.parent)?x.parent:null;
+function treeOrder(b){const out=[],seen=new Set();const walk=(p,d)=>b.ideas.filter(x=>parentOf(b,x)===p).forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);out.push([x,d]);walk(x.id,d+1)});walk(null,0);b.ideas.forEach(x=>{if(!seen.has(x.id))out.push([x,0])});return out}
+function branchOfIdea(id){return S.map.find(b=>b.ideas.some(x=>x.id===id))}
+function descendants(b,id){const out=[];const walk=p=>b.ideas.filter(x=>parentOf(b,x)===p).forEach(x=>{if(out.includes(x.id))return;out.push(x.id);walk(x.id)});walk(id);return out}
+function delIdea(id){const b=branchOfIdea(id);if(!b)return;const x=b.ideas.find(x=>x.id===id);const p=parentOf(b,x);b.ideas.forEach(y=>{if(y.parent===id)y.parent=p});b.ideas=b.ideas.filter(y=>y.id!==id)}
+const bwid=b=>Math.max(60,(b.label||"").length*14+16);
+function computePos(){
+  POS=new Map();ANC=new Map();const N=S.map.length||1;
+  S.map.forEach((b,i)=>{const a=-Math.PI/2+i/N*2*Math.PI;
+    const bx=b.x!=null?b.x:CX+590*Math.cos(a),by=b.y!=null?b.y:CY+455*Math.sin(a);POS.set(b.id,[bx,by]);ANC.set(b.id,"c");
+    const out=Math.atan2(by-CY,bx-CX),co=Math.cos(out),si=Math.sin(out);
+    const side=co>.05?1:-1,anc=side>0?"l":"r";
+    const seen=new Set();
+    const place=(pid,px,py,dep,pw)=>{const ks=b.ideas.filter(x=>parentOf(b,x)===pid&&!seen.has(x.id));const n=ks.length;
+      ks.forEach((x,j)=>{seen.add(x.id);let xx,yy;
+        if(side){xx=px+side*(pw/2+18);yy=py+(j-(n-1)/2)*31+(dep===1?si*((n-1)/2)*31*.95+si*14:0)}
+        else{xx=px;yy=py+(si>0?1:-1)*(38+j*31)}
+        if(x.x!=null){xx=x.x;yy=x.y}
+        POS.set(x.id,[xx,yy]);ANC.set(x.id,x.anc||anc);
+        const w=(x.text||"").length*9+24;place(x.id,side?xx+side*w/2:xx,side?yy:yy+(si>0?1:-1)*10,dep+1,side?w:0)})};
+    place(null,bx,by,1,bwid(b));b.ideas.forEach(x=>{if(!POS.has(x.id)){POS.set(x.id,[bx+60,by+60]);ANC.set(x.id,"c")}});
+  });
+}
+const hsh=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return h};
+function curve(a,b,id,w){const[x1,y1]=a,[x2,y2]=b;const mx=(x1+x2)/2,my=(y1+y2)/2,nx=-(y2-y1),ny=x2-x1,L=Math.hypot(nx,ny)||1,k=((Math.abs(hsh(id))%9)-4)*w;return `M${x1.toFixed(1)} ${y1.toFixed(1)} Q${(mx+nx/L*k).toFixed(1)} ${(my+ny/L*k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
+function drawLines(){
+  const svg=$("plines");if(!svg)return;let d="";
+  S.map.forEach(b=>{const bp=POS.get(b.id);d+=`<path class="l1" d="${curve([CX,CY],bp,b.id,7)}"/>`;
+    b.ideas.forEach(x=>{const p=parentOf(b,x);let st=POS.get(p||b.id).slice();const an=ANC.get(x.id),en=POS.get(x.id);
+      if(!p&&an!=="c")st[0]+=(an==="l"?1:-1)*bwid(b)/2;else if(p&&an!=="c")st[0]+=(an==="l"?1:-1)*((findItem("mapidea",p).text||"").length*9+16);
+      d+=`<path d="${curve(st,en,x.id,3)}"/>`})});
+  svg.innerHTML=d;
+}
+function renderPaper(){
+  const paper=$("paper");if(!paper)return;computePos();
+  const sel=ui.sel||{};
+  let h=`<svg id="plines" class="${ui.paperAnim?"anim":""}" viewBox="0 0 ${BW} ${BH}" aria-hidden="true"></svg><div class="pc" style="left:${CX}px;top:${CY}px">${esc(t("center"))}</div>`;
+  S.map.forEach((b,i)=>{const[x,y]=POS.get(b.id);h+=`<div class="pn pb ${sel.id===b.id?"sel":""}" data-k="b" data-nid="${b.id}" style="left:${x}px;top:${y}px;animation-delay:${i*40}ms"><span class="pt">${esc(b.label||t("branchPh"))}</span></div>`;
+    b.ideas.forEach(z=>{const[x2,y2]=POS.get(z.id);h+=`<div class="pn pi a-${ANC.get(z.id)} s-${z.st} ${sel.id===z.id?"sel":""}" data-k="i" data-nid="${z.id}" style="left:${x2}px;top:${y2}px;animation-delay:${i*40+150}ms"><i class="dot d-${z.st}"></i><span class="pt">${esc(z.text||"…")}</span></div>`})});
+  paper.innerHTML=h;paper.classList.toggle("anim",!!ui.paperAnim);ui.paperAnim=false;drawLines();applyZoom(false);renderTools();
+}
+function itemOf(sel){if(!sel)return null;return sel.k==="b"?S.map.find(b=>b.id===sel.id):findItem("mapidea",sel.id)}
+function renderTools(){
+  const el=$("btools");if(!el)return;const it=itemOf(ui.sel);if(ui.sel&&!it)ui.sel=null;
+  let h="";
+  if(ui.sel&&it){const isI=ui.sel.k==="i";
+    h+=`<span class="selname">${esc(isI?it.text:it.label)}</span>
+    <button type="button" class="pri" data-pt="child">${t("addChild")}</button><button type="button" data-pt="edit">${t("editTxt")}</button>
+    ${isI?`<button type="button" data-pt="status"><i class="dot d-${it.st}"></i> ${t("st_"+it.st)}</button>`:""}
+    <button type="button" data-pt="del" class="${ui.delArm?"arm":""}">${ui.delArm?t("delSure"):t("del")}</button><button type="button" data-pt="unsel" aria-label="${esc(t("close"))}">×</button>`;
+  }else h+=`<button type="button" class="pri" data-pt="newb">${t("addBranch")}</button>`;
+  h+=`<span class="sep"></span><button type="button" data-pt="zout" aria-label="Zoom −">−</button><button type="button" data-pt="zin" aria-label="Zoom +">+</button><button type="button" data-pt="center">${t("recenter")}</button>`;
+  el.innerHTML=h;
+}
+function applyZoom(keep){
+  const v=$("bview"),p=$("paper"),bs=$("bsize");if(!v||!p)return;
+  if(!ui.zoom&&v.clientWidth)ui.zoom=Math.max(.42,Math.min(1,v.clientWidth/1750));
+  const z=ui.zoom||.6;let cx,cy;if(keep){cx=(v.scrollLeft+v.clientWidth/2)/(keep);cy=(v.scrollTop+v.clientHeight/2)/(keep)}
+  p.style.transform=`scale(${z})`;bs.style.width=BW*z+"px";bs.style.height=BH*z+"px";
+  if(keep){v.scrollLeft=cx*z-v.clientWidth/2;v.scrollTop=cy*z-v.clientHeight/2}
+}
+function recenter(){const v=$("bview");applyZoom(false);v.scrollLeft=CX*ui.zoom-v.clientWidth/2;v.scrollTop=CY*ui.zoom-v.clientHeight/2}
+function selectNode(k,id){ui.sel=id?{k,id}:null;ui.delArm=false;document.querySelectorAll("#paper .pn").forEach(n=>n.classList.toggle("sel",n.dataset.nid===id));renderTools()}
+function startEdit(id){
+  const n=document.querySelector(`#paper .pn[data-nid="${id}"]`);if(!n)return;const sp=n.querySelector(".pt");
+  const k=n.dataset.k,it=k==="b"?S.map.find(b=>b.id===id):findItem("mapidea",id);if(!it)return;
+  sp.textContent=k==="b"?(it.label||""):(it.text||"");
+  try{sp.contentEditable="plaintext-only"}catch(e){sp.contentEditable="true"}if(sp.contentEditable!=="plaintext-only")sp.contentEditable="true";
+  sp.focus();const r=document.createRange();r.selectNodeContents(sp);const sl=getSelection();sl.removeAllRanges();sl.addRange(r);
+  const done=()=>{sp.removeEventListener("blur",done);const v=sp.textContent.replace(/\s+/g," ").trim();sp.contentEditable="false";
+    if(v){if(k==="b")it.label=v;else it.text=v}commit()};
+  sp.addEventListener("blur",done);
+  sp.onkeydown=e=>{if(e.key==="Enter"||e.key==="Escape"){e.preventDefault();sp.blur()}};
+}
+(function paperEvents(){
+  const v=$("bview");let drag=null,pan=null;
+  v.addEventListener("pointerdown",e=>{
+    if(e.target.closest('.pt[contenteditable="true"],.pt[contenteditable="plaintext-only"]'))return;
+    const n=e.target.closest(".pn");
+    if(n){e.preventDefault();const id=n.dataset.nid,k=n.dataset.k;let ids=[id];
+      if(k==="b"){const b=S.map.find(b=>b.id===id);ids=ids.concat(b.ideas.map(x=>x.id))}else{const b=branchOfIdea(id);ids=ids.concat(descendants(b,id))}
+      drag={id,k,ids,sx:e.clientX,sy:e.clientY,moved:false,start:ids.map(i=>POS.get(i).slice()),pid:e.pointerId};try{n.setPointerCapture(e.pointerId)}catch(_){}
+    }else if(e.pointerType==="mouse"){pan={sx:e.clientX,sy:e.clientY,sl:v.scrollLeft,st:v.scrollTop,moved:false};v.classList.add("panning")}
+    else pan={sx:e.clientX,sy:e.clientY,touch:true,moved:false};
+  });
+  addEventListener("pointermove",e=>{
+    if(drag){const dx=(e.clientX-drag.sx)/ui.zoom,dy=(e.clientY-drag.sy)/ui.zoom;if(!drag.moved&&Math.hypot(dx,dy)*ui.zoom<5)return;
+      if(!drag.moved){drag.moved=true;document.querySelector(`#paper .pn[data-nid="${drag.id}"]`).classList.add("dragging")}
+      drag.ids.forEach((id,i)=>{const nx=Math.max(20,Math.min(BW-20,drag.start[i][0]+dx)),ny=Math.max(20,Math.min(BH-20,drag.start[i][1]+dy));POS.set(id,[nx,ny]);
+        const el=document.querySelector(`#paper .pn[data-nid="${id}"]`);if(el){el.style.left=nx+"px";el.style.top=ny+"px"}});
+      drawLines()}
+    else if(pan){if(Math.hypot(e.clientX-pan.sx,e.clientY-pan.sy)>5)pan.moved=true;if(!pan.touch){v.scrollLeft=pan.sl-(e.clientX-pan.sx);v.scrollTop=pan.st-(e.clientY-pan.sy)}}
+  });
+  addEventListener("pointerup",()=>{
+    if(drag){const d=drag;drag=null;const n=document.querySelector(`#paper .pn[data-nid="${d.id}"]`);if(n)n.classList.remove("dragging");
+      if(d.moved){d.ids.forEach(id=>{const[x,y]=POS.get(id);const it=S.map.find(b=>b.id===id)||findItem("mapidea",id);if(it){it.x=Math.round(x);it.y=Math.round(y);if(ANC.get(id)&&it.ideas===undefined)it.anc=ANC.get(id)}});save();if(!ui.sel||ui.sel.id!==d.id)selectNode(d.k,d.id)}
+      else if(ui.sel&&ui.sel.id===d.id)startEdit(d.id);else selectNode(d.k,d.id)}
+    else if(pan){if(!pan.moved&&ui.sel)selectNode(null,null);pan=null;v.classList.remove("panning")}
+  });
+  addEventListener("pointercancel",()=>{drag=null;pan=null;v.classList.remove("panning")});
+  v.addEventListener("dblclick",e=>{if(e.target.closest(".pn,.pc"))return;const r=$("paper").getBoundingClientRect();
+    const b={id:uid(),label:t("newBranch"),ideas:[],x:Math.round((e.clientX-r.left)/ui.zoom),y:Math.round((e.clientY-r.top)/ui.zoom)};S.map.push(b);ui.sel={k:"b",id:b.id};commit();startEdit(b.id)});
+  $("btools").addEventListener("click",e=>{const btn=e.target.closest("[data-pt]");if(!btn)return;const a=btn.dataset.pt,sel=ui.sel;
+    if(a==="zin"||a==="zout"){const old=ui.zoom;ui.zoom=Math.max(.35,Math.min(1.6,old*(a==="zin"?1.2:1/1.2)));applyZoom(old);return}
+    if(a==="center"){recenter();return}
+    if(a==="unsel"){selectNode(null,null);return}
+    if(a==="newb"){const vr=$("bview");const b={id:uid(),label:t("newBranch"),ideas:[],x:Math.round((vr.scrollLeft+vr.clientWidth/2)/ui.zoom),y:Math.round((vr.scrollTop+vr.clientHeight/2)/ui.zoom)};
+      S.map.push(b);ui.sel={k:"b",id:b.id};commit();startEdit(b.id);return}
+    if(!sel)return;
+    if(a==="child"){let b,parent=null;if(sel.k==="b")b=S.map.find(x=>x.id===sel.id);else{b=branchOfIdea(sel.id);parent=sel.id}if(!b)return;
+      const x={id:uid(),text:t("newIdea"),st:"idea",parent};b.ideas.push(x);ui.sel={k:"i",id:x.id};commit();startEdit(x.id)}
+    else if(a==="edit")startEdit(sel.id);
+    else if(a==="status"){const x=findItem("mapidea",sel.id);x.st=ST_NEXT[x.st]||"idea";if(x.st==="ok"){const r=btn.getBoundingClientRect();burst(r.left+20,r.top+10,22)}commit()}
+    else if(a==="del"){if(!ui.delArm){ui.delArm=true;renderTools();return}if(sel.k==="b")S.map=S.map.filter(b=>b.id!==sel.id);else delIdea(sel.id);ui.sel=null;ui.delArm=false;commit()}
+  });
+})();
+function renderMapMode(){
+  const m=ui.mmode||"draw";
+  $("mmode").innerHTML=`<button type="button" data-mm="draw" aria-pressed="${m==="draw"}">${t("modeDraw")}</button><button type="button" data-mm="list" aria-pressed="${m==="list"}">${t("modeList")}</button>`;
+  $("drawView").hidden=m!=="draw";$("listView").hidden=m!=="list";$("mapSub").textContent=t(m==="draw"?"mapSdraw":"mapS");
+}
 function findItem(coll,id){if(coll==="mapidea"){for(const b of S.map){const x=b.ideas.find(x=>x.id===id);if(x)return x}return null}return (S[coll]||[]).find(x=>x.id===id)}
 let rzT;addEventListener("resize",()=>{clearTimeout(rzT);rzT=setTimeout(layoutMap,120)});
-function renderAll(){applyI18n();renderHeroStatic();renderTabs();renderHome();renderPrio();renderMap();renderTasks();renderGuests();renderVendors();renderIdeas();renderDay();makeEditable()}
-const editing=()=>{const a=document.activeElement;return !!(a&&a.closest&&a.closest("[data-edit]"))};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-mm]");if(!b)return;ui.mmode=b.dataset.mm;renderMapMode();if(ui.mmode==="list"){ui.mapAnim=true;renderMap();makeEditable()}else{renderPaper();if(!ui.centered){recenter();ui.centered=true}}});
+function renderAll(){applyI18n();renderHeroStatic();renderTabs();renderHome();renderPrio();renderMapMode();renderMap();renderPaper();renderTasks();renderGuests();renderVendors();renderIdeas();renderDay();makeEditable()}
+const editing=()=>{const a=document.activeElement;return !!(a&&a.closest&&(a.closest("[data-edit]")||a.closest("#paper .pt")))};
 function softRender(){if(!editing())renderAll()}
 
 /* =========================================================
    8. EVENTS
    ========================================================= */
-$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;tab=b.dataset.tab;try{history.replaceState(null,"","#"+tab)}catch(_){}renderTabs();if(tab==="map"){ui.mapAnim=true;renderMap();makeEditable()}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;tab=b.dataset.tab;try{history.replaceState(null,"","#"+tab)}catch(_){}renderTabs();if(tab==="map"){ui.mapAnim=true;ui.paperAnim=true;renderMapMode();renderMap();renderPaper();if(!ui.centered){recenter();ui.centered=true}makeEditable()}
   const top=document.querySelector(".tabs").getBoundingClientRect().top+scrollY;if(scrollY>top)scrollTo({top,behavior:reduce?"auto":"smooth"})});
 $("langBtn").onclick=()=>{lang={fr:"es",es:"en",en:"fr"}[lang]||"fr";ls.set("ow-lang2",lang);renderAll()};
 $("meBtn").onclick=()=>{me=other(me);meChosen=true;ls.set("ow-me",me);renderAll();toast(t("iAm",nm(me)))};
@@ -1035,7 +1208,7 @@ document.addEventListener("click",e=>{
     document.querySelectorAll("#mmLines path").forEach((pa,i)=>pa.classList.toggle("on",document.querySelectorAll("#mm .pill")[i].dataset.b===ui.branch));renderBranch();makeEditable();
     if(innerWidth<900)$("branchCard").scrollIntoView({behavior:reduce?"auto":"smooth",block:"nearest"})}
   else if(act==="stcycle"){const x=findItem("mapidea",id);if(!x)return;x.st=ST_NEXT[x.st]||"idea";if(x.st==="ok"){const r=a.getBoundingClientRect();burst(r.left+20,r.top+8,22)}commit()}
-  else if(act==="delmapidea"){S.map.forEach(b=>b.ideas=b.ideas.filter(x=>x.id!==id));commit()}
+  else if(act==="delmapidea"){delIdea(id);commit()}
   else if(act==="delbranch"){if(ui.delB!==id){ui.delB=id;renderBranch();return}S.map=S.map.filter(b=>b.id!==id);ui.delB=null;ui.branch=null;commit()}
   else if(act==="addbranch"){const b={id:uid(),label:"",ideas:[]};S.map.push(b);ui.branch=b.id;tab="map";commit();const f=document.querySelector(`.bcard [data-edit="map:label"]`);if(f)f.focus()}
   else if(act==="priodone"){const p=S.prio.find(p=>p.id===id);p.done=!p.done;if(p.done){const r=a.getBoundingClientRect();burst(r.left+15,r.top+15,22)}commit()}
