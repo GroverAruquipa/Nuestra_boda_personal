@@ -817,11 +817,11 @@ const FR_T={"Fijar la fecha (y una alternativa)": "Fixer la date (et une date de
 const uid=()=>Math.random().toString(36).slice(2,10);
 function seed(){
   const now=Date.now();
-  return patch4({v:3,
-    settings:{a:{name:"Grover"},b:{name:"Laura"},when:"Entre juin et juillet 2027",place:"Québec"},
+  return patch5(patch4({v:3,
+    settings:{a:{name:"Grover"},b:{name:"Laura"},when:"Samedi 5 juin 2027",place:"Québec"},
     notes:[
-      {id:uid(),title:"Ce qu'on a décidé",body:"Le mariage sera entre juin et juillet 2027\nEnviron 70 à 80 invités",by:"a",ts:now},
-      {id:uid(),title:"Encore à décider",body:"La date exacte\nLa salle",by:"a",ts:now},
+      {id:uid(),title:"Ce qu'on a décidé",body:"Le mariage : samedi 5 juin 2027\nEnviron 70 à 80 invités",by:"a",ts:now},
+      {id:uid(),title:"Encore à décider",body:"La salle",by:"a",ts:now},
       {id:uid(),title:"Contacts utiles",body:"",by:"a",ts:now},
       {id:uid(),title:"Une chose à la fois",body:"On a le temps. Une petite étape cette semaine, c'est déjà beaucoup.",by:"a",ts:now}],
     tasks:SEED_TASKS.map(([cat,es,en,due])=>({id:uid(),cat,t:{es,en,fr:FR_T[es]||es},due,who:"both",done:false})),
@@ -843,7 +843,7 @@ function seed(){
       {id:uid(),time:"17:00",text:"Cocktail",ex:true},{id:uid(),time:"18:30",text:"Souper et discours",ex:true},
       {id:uid(),time:"20:00",text:"Première danse",ex:true},{id:uid(),time:"23:30",text:"Fin de soirée",ex:true}],
     hugs:{a:0,b:0,last:null},
-    log:[]});
+    log:[]}));
 }
 const MAP_SEED=[
 ["Date",[["Se marier légalement avant ?","q"],["Demander aux proches quand ils sont libres","q"],["Fixer la date 6 mois avant","idea"]]],
@@ -862,6 +862,15 @@ const MAP_SEED=[
 ["Invitations",[["Invitation par le site web ?","q"],["Petit cadeau ?","q"]]],
 ["Lune de miel",[["Hôtel à Dunham ?","q"],["Chalet ou cottage","idea"]]]];
 const PRIO_SEED=["Préparation du mariage","La date, à fixer 6 mois avant","Le budget","La liste d'invités : qui appeler ?","Les invitations (novembre)","Les papiers légaux","Photo et vidéo (diffusion en direct)","Logistique : traduction, transport, hébergement, trousse d'urgence","Maquillage et coiffure ?"];
+function patch5(o){
+  const st=o.settings||{};if(!st.when||st.when==="Entre juin et juillet 2027")st.when="Samedi 5 juin 2027";
+  (o.notes||[]).forEach(n=>{if(n.body)n.body=n.body.replace("Le mariage sera entre juin et juillet 2027","Le mariage : samedi 5 juin 2027").replace(/^La date exacte\n?/m,"")});
+  (o.tasks||[]).forEach(x=>{if(x.t&&typeof x.t==="object"&&x.t.es==="Fijar la fecha (y una alternativa)")x.done=true});
+  (o.prio||[]).forEach(p=>{if(p.text==="La date, à fixer 6 mois avant"){p.text="La date : samedi 5 juin 2027";p.done=true}});
+  const d=(o.map||[]).find(b=>b.label==="Date");
+  if(d&&!d.ideas.some(x=>/5 juin/.test(x.text))){d.ideas.forEach(x=>{if(x.text==="Fixer la date 6 mois avant")x.st="ok"});d.ideas.unshift({id:uid(),text:"Samedi 5 juin 2027",st:"ok"})}
+  o.v=Math.max(o.v||1,5);return o;
+}
 function patch4(o){
   if(!Array.isArray(o.map)||!o.map.length)o.map=MAP_SEED.map(([label,ideas])=>({id:uid(),label,ideas:ideas.map(([text,st])=>({id:uid(),text,st}))}));
   if(!Array.isArray(o.prio)||!o.prio.length)o.prio=PRIO_SEED.map(text=>({id:uid(),text,done:false}));
@@ -887,6 +896,7 @@ function normalize(s){
   if((s.v||1)<2){["guests","vendors","ideas","day"].forEach(k=>{if(o[k].some(i=>i.ex))o[k]=[...o[k].filter(i=>!i.ex),...d[k]]});o.v=2}
   o.v=Math.max(o.v||1,3);
   if((s.v||1)<4)patch4(o);
+  if((s.v||1)<5)patch5(o);
   if(!Array.isArray(o.map))o.map=[];if(!Array.isArray(o.prio))o.prio=[];
   return o;
 }
