@@ -1207,6 +1207,7 @@ function startEdit(id){
   const done=()=>{sp.removeEventListener("blur",done);const v=sp.textContent.replace(/\s+/g," ").trim();sp.contentEditable="false";
     if(v){if(k==="b")it.label=v;else it.text=v}commit()};
   sp.addEventListener("blur",done);
+  sp.oninput=()=>{const v=sp.textContent.replace(/\s+/g," ").trim();if(!v)return;if(k==="b")it.label=v;else it.text=v;clearTimeout(typeT);typeT=setTimeout(save,400)};
   sp.onkeydown=e=>{if(e.key==="Enter"||e.key==="Escape"){e.preventDefault();sp.blur()}};
 }
 (function paperEvents(){
@@ -1345,17 +1346,24 @@ document.addEventListener("click",e=>{
   else if(act==="delnote"){S.notes=S.notes.filter(n=>n.id!==id);commit()}
   else if(act==="clearex"){["guests","vendors","ideas","day"].forEach(k=>S[k]=S[k].filter(i=>!i.ex));commit()}
 });
-document.addEventListener("focusout",e=>{
-  const el=e.target.closest&&e.target.closest("[data-edit]");if(!el)return;
-  const [coll,field]=el.dataset.edit.split(":");const row=el.closest("[data-id]");const it=row&&findItem(coll,row.dataset.id);if(!it)return;
+function applyEdit(el,final){
+  const [coll,field]=el.dataset.edit.split(":");const row=el.closest("[data-id]");const it=row&&findItem(coll,row.dataset.id);if(!it)return false;
   const v=el.textContent.replace(/\u00a0/g," ").replace(/\n{3,}/g,"\n\n").trim();
-  if(coll==="tasks"&&field==="t"){if(v&&v!==title(it))it.t=v}
-  else if(field==="price"){it.price=parseFloat(v.replace(/[^\d.,]/g,"").replace(",","."))||0}
-  else if(field==="time"){const m=v.match(/^(\d{1,2})\s*[:hH.]\s*(\d{2})$/);if(m)it.time=String(Math.min(23,+m[1])).padStart(2,"0")+":"+m[2]}
-  else if(v||coll==="notes"||field==="contact"||field==="dueTxt"){if(it[field]===v)return;it[field]=v}
+  if(coll==="tasks"&&field==="t"){if(!v||v===title(it))return false;it.t=v}
+  else if(field==="price"){if(!final)return false;it.price=parseFloat(v.replace(/[^\d.,]/g,"").replace(",","."))||0}
+  else if(field==="time"){if(!final)return false;const m=v.match(/^(\d{1,2})\s*[:hH.]\s*(\d{2})$/);if(!m)return false;it.time=String(Math.min(23,+m[1])).padStart(2,"0")+":"+m[2]}
+  else if(v||coll==="notes"||field==="contact"||field==="dueTxt"){if(it[field]===v)return false;it[field]=v}
+  else return false;
   if(coll==="notes"){it.by=me;it.ts=Date.now()}
-  save();setTimeout(softRender,0);
-});
+  return true;
+}
+let typeT=null;
+document.addEventListener("input",e=>{const el=e.target.closest&&e.target.closest("[data-edit]");if(!el)return;
+  if(applyEdit(el,false)){clearTimeout(typeT);typeT=setTimeout(save,400)}});
+document.addEventListener("focusout",e=>{const el=e.target.closest&&e.target.closest("[data-edit]");if(!el)return;
+  applyEdit(el,true);clearTimeout(typeT);save();setTimeout(softRender,0)});
+addEventListener("pagehide",()=>{const a=document.activeElement;if(a&&a.closest&&a.closest("[data-edit]"))applyEdit(a.closest("[data-edit]"),true);save()});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){const a=document.activeElement;if(a&&a.closest&&a.closest("[data-edit]"))applyEdit(a.closest("[data-edit]"),true);save()}});
 document.addEventListener("keydown",e=>{const el=e.target.closest&&e.target.closest("[data-edit]");if(!el)return;
   if(e.key==="Enter"&&!el.classList.contains("blockEd")){e.preventDefault();el.blur()}
   if(e.key==="Escape")el.blur()});
