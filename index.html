@@ -178,6 +178,14 @@ button{cursor:pointer}
 @keyframes pfade{from{opacity:.01}to{opacity:1}}
 .hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
 .ilist li .indent{display:inline-block;flex:none}
+/* bulk add + data transfer */
+.bulk{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:10px 14px;margin:-6px 0 16px}
+.bulk summary{cursor:pointer;font-weight:600;color:var(--rose);padding:2px 0}
+.bulk textarea,.xfer textarea{width:100%;margin-top:10px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px;font:inherit;font-size:15px;resize:vertical;min-height:120px}
+.bulk .brow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.bulk select{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px}
+.xfer p{margin:0;color:var(--muted);font-size:14px}
+.xfer textarea{font-family:ui-monospace,Menlo,monospace;font-size:12px;min-height:150px;word-break:break-all}
 /* story: polaroids */
 .story{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:center;margin-bottom:34px}
 .story .kicker{margin-top:0}
@@ -603,6 +611,10 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
       <input type="number" id="gN" min="1" max="20" value="1" aria-label="Personnes">
       <button class="primary" data-i18n="add"></button>
     </form>
+    <details class="bulk"><summary data-i18n="bulkT"></summary>
+      <textarea id="bulkG" rows="6" data-i18n-ph="bulkPh"></textarea>
+      <div class="brow"><select id="bulkSide" aria-label="Côté"></select><button class="primary" type="button" id="bulkAdd" data-i18n="bulkBtn"></button></div>
+    </details>
     <div class="filters" id="guestFilters"></div>
     <div class="glist" id="guestList"></div>
   </section>
@@ -739,6 +751,12 @@ now:"now",mAgo:"{0} min ago",hAgo:"{0} h ago",dAgo:"{0} d ago",
 m12:"12+ months before",mN:"{0} months before",m1:"1 month before",w2:"2 weeks before",w1:"1 week before",after:"After",
 nothing:"Nothing here yet.",allDone:"Everything on this list is done!"}
 };
+Object.assign(T.fr,{shareData:"Envoyer mes données",getData:"Recevoir des données",shareS:"Copiez ce code et envoyez-le à l'autre (Messenger, courriel…). Il contient tout ce qui est écrit sur cet appareil.",copy:"Copier",copied:"Copié",selectCopy:"Le code est sélectionné : copiez-le",shareBtn:"Partager",importS:"Collez ici le code reçu, puis touchez Importer. Ce qui manque est ajouté, et rien n'est effacé.",importBtn:"Importer",importOk:"{0} éléments ajoutés ou mis à jour",importErr:"Ce code n'est pas valide. Vérifiez qu'il est complet.",
+bulkT:"Ajouter plusieurs invités d'un coup",bulkPh:"Un nom par ligne. Ajoutez « - oui » à la fin si la personne a confirmé.",bulkBtn:"Ajouter la liste",bulkOk:"{0} invités ajoutés"});
+Object.assign(T.es,{shareData:"Enviar mis datos",getData:"Recibir datos",shareS:"Copia este código y envíaselo al otro (Messenger, correo…). Contiene todo lo escrito en este dispositivo.",copy:"Copiar",copied:"Copiado",selectCopy:"El código está seleccionado: cópialo",shareBtn:"Compartir",importS:"Pega aquí el código recibido y toca Importar. Lo que falta se agrega y no se borra nada.",importBtn:"Importar",importOk:"{0} elementos agregados o actualizados",importErr:"Este código no es válido. Revisa que esté completo.",
+bulkT:"Agregar varios invitados a la vez",bulkPh:"Un nombre por línea. Agrega « - sí » al final si la persona confirmó.",bulkBtn:"Agregar la lista",bulkOk:"{0} invitados agregados"});
+Object.assign(T.en,{shareData:"Send my data",getData:"Receive data",shareS:"Copy this code and send it to the other person (Messenger, email…). It holds everything written on this device.",copy:"Copy",copied:"Copied",selectCopy:"The code is selected: copy it",shareBtn:"Share",importS:"Paste the code you received here, then tap Import. Missing items are added and nothing is erased.",importBtn:"Import",importOk:"{0} items added or updated",importErr:"This code isn't valid. Check that it's complete.",
+bulkT:"Add several guests at once",bulkPh:"One name per line. Add “- yes” at the end if the person confirmed.",bulkBtn:"Add the list",bulkOk:"{0} guests added"});
 Object.assign(T.fr,{bothHere:"Vous êtes là tous les deux en ce moment",otherSeen:"{0} : dernière visite {1}",otherNever:"{0} n'a pas encore ouvert l'application",hugLive:"{0} est là : ton câlin arrive tout de suite",hugLater:"{0} verra ton câlin en ouvrant l'application",hugFrom:"{0} t'envoie un câlin",tapClose:"Touchez pour fermer"});
 Object.assign(T.es,{bothHere:"Están los dos aquí ahora mismo",otherSeen:"{0}: visto {1}",otherNever:"{0} todavía no se ha conectado",hugLive:"{0} está aquí: tu abrazo llega ahora mismo",hugLater:"{0} verá tu abrazo al abrir la aplicación",hugFrom:"{0} te envía un abrazo",tapClose:"Toca para cerrar"});
 Object.assign(T.en,{bothHere:"You're both here right now",otherSeen:"{0}: seen {1}",otherNever:"{0} hasn't connected yet",hugLive:"{0} is here: your hug arrives right now",hugLater:"{0} will see your hug when opening the app",hugFrom:"{0} is sending you a hug",tapClose:"Tap to close"});
@@ -1062,6 +1080,7 @@ function renderTasks(){
 }
 const RS={pending:"pending",yes:"yes",no:"no"};
 function renderGuests(){
+  if($("bulkSide"))$("bulkSide").innerHTML=`<option value="a">${esc(nm("a"))}</option><option value="b">${esc(nm("b"))}</option><option value="both">${t("both2")}</option>`;
   $("gSide").innerHTML=`<option value="a">${esc(nm("a"))}</option><option value="b">${esc(nm("b"))}</option><option value="both">${t("both2")}</option>`;
   const sum=k=>S.guests.filter(g=>!k||g.rsvp===k).reduce((a,g)=>a+(+g.n||1),0);
   $("gsum").innerHTML=[["invited",sum()],["yes",sum("yes")],["pending",sum("pending")],["no",sum("no")]].map(([k,v])=>`<div class="stat"><div class="lbl">${t(k)}</div><div class="big">${v}</div><div class="note">${t("people")}</div></div>`).join("");
@@ -1300,12 +1319,16 @@ function openMore(note){
   $("moreRoot").innerHTML=`<div class="more" id="moreScrim"><div class="msheet" role="dialog" aria-modal="true" aria-label="${esc(t("more"))}"><div class="grab"></div>
     ${MORE.map(k=>`<button type="button" data-mgo="${k}" aria-current="${tab===k}">${ico(k)}${t(k)}</button>`).join("")}
     <button type="button" data-mgo="settings">${ico("settings")}${t("settings")}</button>
+    <button type="button" data-mgo="export">${ico("install")}${t("shareData")}</button>
+    <button type="button" data-mgo="import">${ico("install")}${t("getData")}</button>
     <button type="button" data-mgo="lang">${ico("lang")}${t("langL")} · ${["fr","es","en"].map(l=>l===lang?`<b>${l.toUpperCase()}</b>`:l.toUpperCase()).join(" ")}</button>
     ${standalone()?"":`<button type="button" data-mgo="install">${ico("install")}${t("install")}</button>`}
     ${note?`<p class="mnote">${esc(note)}</p>`:""}</div></div>`;
   $("moreScrim").onclick=e=>{if(e.target.id==="moreScrim"){closeMore();return}const b=e.target.closest("[data-mgo]");if(!b)return;const k=b.dataset.mgo;
     if(MORE.includes(k))goTab(k);
     else if(k==="settings"){closeMore();openSettings()}
+    else if(k==="export"){closeMore();openXfer("export")}
+    else if(k==="import"){closeMore();openXfer("import")}
     else if(k==="lang"){lang={fr:"es",es:"en",en:"fr"}[lang]||"fr";ls.set("ow-lang2",lang);renderAll();openMore()}
     else if(k==="install"){if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;closeMore()})}else openMore(isIOS()?t("installIOS"):t("installOther"))}};
 }
@@ -1398,6 +1421,46 @@ $("vendorForm").onsubmit=e=>{e.preventDefault();const v=$("vName").value.trim();
 $("ideaForm").onsubmit=e=>{e.preventDefault();const v=$("ideaText").value.trim();if(!v)return;S.ideas.push({id:uid(),k:ui.ideaK,by:me,text:v,link:$("ideaLink").value.trim(),ts:Date.now(),hearts:[],ans:[]});log(ui.ideaK==="q"?"q":"idea");$("ideaText").value="";$("ideaLink").value="";commit()};
 $("dayForm").onsubmit=e=>{e.preventDefault();const tm=$("dTime").value,v=$("dText").value.trim();if(!tm||!v)return;S.day.push({id:uid(),time:tm,text:v});$("dText").value="";commit()};
 
+/* bulk guests */
+$("bulkAdd").onclick=()=>{const side=$("bulkSide").value;const have=new Set(S.guests.map(g=>nrm(g.name)));let n=0;
+  $("bulkG").value.split(/\n+/).forEach(line=>{let v=line.replace(/^[\s•*\-–\d.)]+/,"").trim();if(!v)return;let rsvp="pending";
+    const m=v.match(/\s*[-–:,]\s*(oui|yes|s[ií])\s*$/i);if(m){rsvp="yes";v=v.slice(0,m.index).trim()}
+    if(!v||have.has(nrm(v)))return;have.add(nrm(v));S.guests.push({id:uid(),name:v,side,n:1,rsvp,diet:""});n++});
+  $("bulkG").value="";commit();toast(t("bulkOk",n));};
+/* send / receive data between phones */
+const nrm=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+const KEYF={tasks:x=>nrm(typeof x.t==="string"?x.t:(x.t&&(x.t.fr||x.t.es))),guests:x=>nrm(x.name),vendors:x=>nrm(x.name),ideas:x=>nrm(x.text),day:x=>x.time+"|"+nrm(x.text),notes:x=>nrm(x.title),prio:x=>nrm(x.text)};
+function mergeList(local,inc,key,idMap){let n=0;(inc||[]).forEach(it=>{if(!it||!it.id)return;const k=key(it);
+  const f=local.find(x=>x.id===it.id)||(k&&local.find(x=>key(x)===k));
+  if(f){idMap&&(idMap[it.id]=f.id);const before=JSON.stringify(f);const keep=f.id;Object.assign(f,JSON.parse(JSON.stringify(it)));f.id=keep;if(JSON.stringify(f)!==before)n++}
+  else{local.push(JSON.parse(JSON.stringify(it)));n++}});return n}
+function mergeState(inc){
+  inc=normalize(inc);let n=0;
+  Object.keys(KEYF).forEach(k=>{n+=mergeList(S[k],inc[k],KEYF[k])});
+  (inc.map||[]).forEach(b=>{const f=S.map.find(x=>x.id===b.id)||S.map.find(x=>nrm(x.label)===nrm(b.label));
+    if(!f){S.map.push(JSON.parse(JSON.stringify(b)));n++;return}
+    if(b.x!=null){f.x=b.x;f.y=b.y}const idMap={};n+=mergeList(f.ideas,b.ideas,x=>nrm(x.text),idMap);
+    f.ideas.forEach(x=>{if(x.parent&&idMap[x.parent])x.parent=idMap[x.parent]})});
+  const seen=new Set(S.log.map(e=>e.ts+e.k));(inc.log||[]).forEach(e=>{if(!seen.has(e.ts+e.k))S.log.push(e)});S.log.sort((a,b)=>b.ts-a.ts);S.log=S.log.slice(0,40);
+  S.hugs.a=Math.max(S.hugs.a,inc.hugs.a||0);S.hugs.b=Math.max(S.hugs.b,inc.hugs.b||0);if(inc.hugs.last&&(!S.hugs.last||inc.hugs.last.ts>S.hugs.last.ts))S.hugs.last=inc.hugs.last;
+  return n;
+}
+const encodeS=()=>"NM1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+function decodeS(txt){const m=String(txt).replace(/\s+/g,"").match(/NM1:([A-Za-z0-9+/=]+)/);if(!m)throw 0;return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}
+function openXfer(mode){
+  const ex=mode==="export";const code=ex?encodeS():"";
+  $("sheetRoot").innerHTML=`<div class="scrim" id="scrim"><div class="sheet xfer" role="dialog" aria-modal="true" aria-labelledby="xT">
+    <h2 id="xT">${t(ex?"shareData":"getData")}</h2><p>${t(ex?"shareS":"importS")}</p>
+    <textarea id="xTxt" ${ex?"readonly":""} aria-label="${esc(t(ex?"shareData":"getData"))}">${esc(code)}</textarea>
+    <div class="acts">${ex?`${navigator.share?`<button type="button" class="ghost" id="xShare">${t("shareBtn")}</button>`:""}<button type="button" class="primary" id="xCopy">${t("copy")}</button>`:`<button type="button" class="primary" id="xImp">${t("importBtn")}</button>`}
+      <button type="button" class="ghost" id="xClose">${t("close")}</button></div></div></div>`;
+  const close=()=>{$("sheetRoot").innerHTML=""};
+  $("xClose").onclick=close;$("scrim").onclick=e=>{if(e.target.id==="scrim")close()};
+  if(ex){$("xCopy").onclick=()=>{const ta=$("xTxt");const fb=()=>{ta.focus();ta.select();toast(t("selectCopy"))};
+      try{navigator.clipboard.writeText(code).then(()=>toast(t("copied")),fb)}catch(_){fb()}};
+    if($("xShare"))$("xShare").onclick=()=>navigator.share({title:"Notre mariage",text:code}).catch(()=>{});}
+  else $("xImp").onclick=()=>{let inc;try{inc=decodeS($("xTxt").value)}catch(_){toast(t("importErr"));return}const n=mergeState(inc);close();commit();toast(t("importOk",n))};
+}
 /* settings sheet */
 $("setBtn").onclick=openSettings;
 function openSettings(){
@@ -1410,6 +1473,7 @@ function openSettings(){
       <label class="field" style="grid-column:1/-1">${t("whenL")}<input id="sW" value="${esc(s.when||"")}" placeholder="${esc(t("whenPh"))}"></label>
       <label class="field" style="grid-column:1/-1">${t("place")}<input id="sP" value="${esc(s.place||"")}"></label>
     </div>
+    <div class="acts" style="justify-content:flex-start"><button type="button" class="ghost" id="sExp">${t("shareData")}</button><button type="button" class="ghost" id="sImp">${t("getData")}</button></div>
     <div class="acts"><button type="button" class="danger" id="sReset">${t("reset")}</button><span id="sConfirm" hidden>${t("resetQ")} <button type="button" class="ghost" id="sYes">${t("resetYes")}</button></span>
       <button type="button" class="ghost" id="sClose">${t("close")}</button><button class="primary">${t("save")}</button></div>
   </form></div>`;
@@ -1419,6 +1483,7 @@ function openSettings(){
   $("sClose").onclick=close;
   $("scrim").onkeydown=e=>{if(e.key==="Escape")close()};
   $("sReset").onclick=()=>{$("sConfirm").hidden=false};
+  $("sExp").onclick=()=>{close();openXfer("export")};$("sImp").onclick=()=>{close();openXfer("import")};
   $("sYes").onclick=()=>{const keep=S.settings;S=seed();S.settings=keep;["guests","vendors","ideas","day"].forEach(k=>S[k]=[]);close();commit()};
   $("setForm").onsubmit=e=>{e.preventDefault();
     S.settings=Object.assign({},S.settings,{a:Object.assign({},S.settings.a,{name:$("sNa").value.trim()||"A"}),b:Object.assign({},S.settings.b,{name:$("sNb").value.trim()||"B"}),when:$("sW").value.trim(),place:$("sP").value.trim()});
