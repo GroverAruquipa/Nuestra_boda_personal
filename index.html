@@ -777,7 +777,14 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
    Paste your Firebase web config here (see README) so both of you
    see the same data in real time.
    ========================================================= */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC9gJLjGOOZyJjgaKzwgmT7rxoTQKlu4oc",
+  authDomain: "notre-marriage.firebaseapp.com",
+  projectId: "notre-marriage",
+  storageBucket: "notre-marriage.firebasestorage.app",
+  messagingSenderId: "1055075113734",
+  appId: "1:1055075113734:web:2ec7052eb75bc8621c9c87"
+};
 const FIREBASE_DOC = "weddings/ours";
 
 /* =========================================================
@@ -854,6 +861,9 @@ now:"now",mAgo:"{0} min ago",hAgo:"{0} h ago",dAgo:"{0} d ago",
 m12:"12+ months before",mN:"{0} months before",m1:"1 month before",w2:"2 weeks before",w1:"1 week before",after:"After",
 nothing:"Nothing here yet.",allDone:"Everything on this list is done!"}
 };
+Object.assign(T.fr,{syncNow:"Partagez vos données.",syncWhy:"Connectez-vous avec votre compte Google : ce que l'un écrit apparaîtra chez l'autre, et ce que vous avez déjà écrit est gardé.",syncBtn:"Se connecter avec Google",inAppMsg:"Messenger ne permet pas la connexion Google. Touchez ⋯ en haut, puis « Ouvrir dans le navigateur » (Chrome ou Safari).",authDomainErr:"Ce site n'est pas encore autorisé dans Firebase (Authentication → Domaines autorisés).",signErr:"La connexion n'a pas marché"});
+Object.assign(T.es,{syncNow:"Compartan sus datos.",syncWhy:"Entra con tu cuenta Google: lo que uno escriba le aparecerá al otro, y lo que ya escribiste se conserva.",syncBtn:"Entrar con Google",inAppMsg:"Messenger no permite entrar con Google. Toca ⋯ arriba y luego « Abrir en el navegador » (Chrome o Safari).",authDomainErr:"Este sitio todavía no está autorizado en Firebase (Authentication → Dominios autorizados).",signErr:"No se pudo entrar"});
+Object.assign(T.en,{syncNow:"Share your data.",syncWhy:"Sign in with your Google account: what one of you writes shows up for the other, and what you already wrote is kept.",syncBtn:"Sign in with Google",inAppMsg:"Messenger doesn't allow Google sign-in. Tap ⋯ at the top, then “Open in browser” (Chrome or Safari).",authDomainErr:"This site isn't authorized in Firebase yet (Authentication → Authorized domains).",signErr:"Sign-in didn't work"});
 Object.assign(T.fr,{budget:"Budget",menu:"Menu",budgetT:"Notre budget",budgetS:"Ce qu'on prévoit et ce qu'on dépense vraiment, par catégorie. Touchez un montant pour le changer.",bTarget:"Budget visé",bTargetPh:"Montant",bPlan:"Prévu",bReal:"Dépensé",bLeft:"Reste",bLeftT:"sur le budget visé",bLeftP:"sur le prévu",bItem:"Poste",bItemPh:"Ex. : salle, traiteur…",bAdd:"+ Ajouter une ligne",bEmpty:"Ajoutez des montants prévus ou dépensés pour voir le graphique.",
 menuT:"Notre menu",menuS:"Les options pour chaque service. Cochez celles qu'on garde, donnez des étoiles, notez la quantité, le prix et le traiteur.",menuChosen:"Total des options choisies",mChoose:"Choisir",mRating:"Note",mQty:"Quantité",mCost:"Prix $",mVendor:"Traiteur",mAddPh:"Nouvelle option…",
 byCat:"Par catégorie",byPeriod:"Par période",p9:"Dès maintenant",p5:"Entre 8 et 5 mois avant",p2:"Entre 4 et 2 mois avant",p1:"Le dernier mois",p0:"La dernière semaine",pa:"Après le mariage",
@@ -1190,8 +1200,12 @@ function taskRow(x){
     <button class="whob" data-act="who" title="${esc(x.who==="both"?t("both"):nm(x.who))}">${av(x.who)}</button>
     <button class="x" data-act="deltask" aria-label="${esc(t("del"))}">×</button></div>`;
 }
+const inApp=()=>/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|WhatsApp|Snapchat/i.test(navigator.userAgent||"");
 function renderHome(){
   const b=[];
+  if(FIREBASE_CONFIG&&syncState!=="on"&&syncState!=="local"){
+    b.push(inApp()?`<div class="banner"><p><b>${t("syncNow")}</b> ${t("inAppMsg")}</p></div>`
+      :`<div class="banner"><p><b>${t("syncNow")}</b> ${t("syncWhy")}</p><button class="primary" type="button" data-act="signin">${t("syncBtn")}</button></div>`)}
   if(!meChosen)b.push(`<div class="banner"><p>${t("welcome")}</p><button class="ghost" data-act="iam" data-w="a">${av("a")} ${esc(nm("a"))}</button><button class="ghost" data-act="iam" data-w="b">${av("b")} ${esc(nm("b"))}</button></div>`);
   const hasEx=["guests","vendors","ideas","day"].some(k=>S[k].some(i=>i.ex));
   if(hasEx)b.push(`<div class="banner gold"><p>${t("exBanner")}</p><button class="ghost" data-act="clearex">${t("clearEx")}</button></div>`);
@@ -1576,6 +1590,7 @@ document.addEventListener("click",e=>{
   else if(act==="msel"){const m=S.menu.find(m=>m.id===id);m.sel=!m.sel;if(m.sel){const r=a.getBoundingClientRect();burst(r.left+13,r.top+13,18)}commit()}
   else if(act==="mstar"){const m=S.menu.find(m=>m.id===id);const n=+a.dataset.n;m.rating=m.rating===n?0:n;commit()}
   else if(act==="delmenu"){S.menu=S.menu.filter(m=>m.id!==id);commit()}
+  else if(act==="signin"){cloud&&cloud.signIn&&cloud.signIn()}
   else if(act==="addnote"){const n={id:uid(),title:"",body:"",by:me,ts:Date.now()};S.notes.push(n);commit();const f=document.querySelector(`.note[data-id="${n.id}"] [data-edit="notes:title"]`);if(f)f.focus()}
   else if(act==="delnote"){S.notes=S.notes.filter(n=>n.id!==id);commit()}
   else if(act==="clearex"){["guests","vendors","ideas","day"].forEach(k=>S[k]=S[k].filter(i=>!i.ex));commit()}
@@ -1707,9 +1722,19 @@ async function initCloud(){
     await Promise.all([loadScript(base+"firebase-auth-compat.js"),loadScript(base+"firebase-firestore-compat.js")]);
     firebase.initializeApp(FIREBASE_CONFIG);
     const auth=firebase.auth(),db=firebase.firestore();
-    cloud={signIn:()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(()=>setSync("err"))};
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+    auth.getRedirectResult().catch(e=>{cloud&&(cloud.lastErr=e&&e.code);softRender()});
+    cloud={signIn:()=>{
+      if(inApp()){toast(t("inAppMsg"));return}
+      const pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({prompt:"select_account"});
+      auth.signInWithPopup(pr).catch(e=>{const c=e&&e.code||"";cloud.lastErr=c;
+        if(/popup-blocked|operation-not-supported|popup-closed-by-user|cancelled-popup/.test(c)&&!/closed-by-user|cancelled/.test(c))auth.signInWithRedirect(pr);
+        else if(/unauthorized-domain/.test(c))toast(t("authDomainErr"));
+        else if(!/closed-by-user|cancelled/.test(c)){toast(t("signErr")+" ("+c+")");setSync("login")}})},
+      signOut:()=>auth.signOut()};
     auth.onAuthStateChanged(u=>{
-      if(!u){cloud.ref=null;setSync("login");return}
+      if(!u){cloud.ref=null;cloud.user=null;setSync("login");softRender();return}
+      cloud.user=u;
       cloud.ref=db.doc(FIREBASE_DOC);
       if(!cloud.ping){
         const pref=w=>db.doc(`weddings/presence-${w}`);
@@ -1725,9 +1750,10 @@ async function initCloud(){
       }
       cloud.ref.onSnapshot(snap=>{
         if(snap.metadata.hasPendingWrites)return;
-        if(!snap.exists){save();setSync("on");return}
-        const prevHug=S.hugs.last;
-        S=normalize(snap.data().state);ls.set(KEY,JSON.stringify(S));softRender();setSync("on");
+        if(!snap.exists){cloud.joined=true;save();setSync("on");softRender();return}
+        const remote=normalize(snap.data().state);
+        if(!cloud.joined){cloud.joined=true;const local=S;S=remote;const n=mergeState(local);ls.set(KEY,JSON.stringify(S));if(n)save();renderAll();setSync("on");return}
+        S=remote;ls.set(KEY,JSON.stringify(S));softRender();setSync("on");
         const h=S.hugs.last;const seen=+ls.get("ow-hugseen")||0;
         
       },()=>setSync("err"));

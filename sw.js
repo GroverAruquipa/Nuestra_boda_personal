@@ -1,6 +1,6 @@
 // Offline support for the wedding app. The page itself is fetched from the
 // network first (so updates arrive right away) and falls back to the cache.
-const CACHE = "notre-mariage-v7";
+const CACHE = "notre-mariage-v8";
 const ASSETS = [
   "./",
   "index.html",
