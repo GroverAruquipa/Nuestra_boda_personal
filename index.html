@@ -861,6 +861,9 @@ now:"now",mAgo:"{0} min ago",hAgo:"{0} h ago",dAgo:"{0} d ago",
 m12:"12+ months before",mN:"{0} months before",m1:"1 month before",w2:"2 weeks before",w1:"1 week before",after:"After",
 nothing:"Nothing here yet.",allDone:"Everything on this list is done!"}
 };
+Object.assign(T.fr,{syncErrMsg:"La synchronisation a échoué",resync:"Synchroniser maintenant",resyncOk:"Synchronisé",diagAs:"Connecté : {0}",diagNo:"Pas connecté avec Google",diagSnap:"Dernière réception {0} (de {1})",diagWrite:"Dernier envoi {0}",diagErr:"Erreur : {0}"});
+Object.assign(T.es,{syncErrMsg:"La sincronización falló",resync:"Sincronizar ahora",resyncOk:"Sincronizado",diagAs:"Conectado: {0}",diagNo:"Sin conectar con Google",diagSnap:"Última recepción {0} (de {1})",diagWrite:"Último envío {0}",diagErr:"Error: {0}"});
+Object.assign(T.en,{syncErrMsg:"Sync failed",resync:"Sync now",resyncOk:"Synced",diagAs:"Signed in: {0}",diagNo:"Not signed in with Google",diagSnap:"Last received {0} (from {1})",diagWrite:"Last sent {0}",diagErr:"Error: {0}"});
 Object.assign(T.fr,{syncNow:"Partagez vos données.",syncWhy:"Connectez-vous avec votre compte Google : ce que l'un écrit apparaîtra chez l'autre, et ce que vous avez déjà écrit est gardé.",syncBtn:"Se connecter avec Google",inAppMsg:"Messenger ne permet pas la connexion Google. Touchez ⋯ en haut, puis « Ouvrir dans le navigateur » (Chrome ou Safari).",authDomainErr:"Ce site n'est pas encore autorisé dans Firebase (Authentication → Domaines autorisés).",signErr:"La connexion n'a pas marché"});
 Object.assign(T.es,{syncNow:"Compartan sus datos.",syncWhy:"Entra con tu cuenta Google: lo que uno escriba le aparecerá al otro, y lo que ya escribiste se conserva.",syncBtn:"Entrar con Google",inAppMsg:"Messenger no permite entrar con Google. Toca ⋯ arriba y luego « Abrir en el navegador » (Chrome o Safari).",authDomainErr:"Este sitio todavía no está autorizado en Firebase (Authentication → Dominios autorizados).",signErr:"No se pudo entrar"});
 Object.assign(T.en,{syncNow:"Share your data.",syncWhy:"Sign in with your Google account: what one of you writes shows up for the other, and what you already wrote is kept.",syncBtn:"Sign in with Google",inAppMsg:"Messenger doesn't allow Google sign-in. Tap ⋯ at the top, then “Open in browser” (Chrome or Safari).",authDomainErr:"This site isn't authorized in Firebase yet (Authentication → Authorized domains).",signErr:"Sign-in didn't work"});
@@ -1090,7 +1093,8 @@ let saveTimer=null;
 
 function save(){
   ls.set(KEY,JSON.stringify(S));
-  if(cloud&&cloud.ref){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{cloud.ref.set({state:JSON.parse(JSON.stringify(S)),updated:Date.now()}).catch(()=>setSync("err"))},350)}
+  if(cloud&&cloud.ref&&cloud.joined){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const who=(cloud.user&&cloud.user.email)||"";
+    cloud.ref.set({state:JSON.parse(JSON.stringify(S)),updated:Date.now(),by:who}).then(()=>{cloud.lastWrite=Date.now();cloud.lastErr=null}).catch(e=>{cloud.lastErr="write: "+(e&&e.code||e);setSync("err");toast(t("syncErrMsg")+" ("+(e&&e.code||"?")+")")})},350)}
 }
 function commit(){save();renderAll()}
 function log(k,x){S.log.unshift({by:me,k,x:x||"",ts:Date.now()});S.log=S.log.slice(0,40)}
@@ -1522,15 +1526,27 @@ function openMore(note){
     <button type="button" data-mgo="export">${ico("install")}${t("shareData")}</button>
     <button type="button" data-mgo="import">${ico("install")}${t("getData")}</button>
     <button type="button" data-mgo="lang">${ico("lang")}${t("langL")} · ${["fr","es","en"].map(l=>l===lang?`<b>${l.toUpperCase()}</b>`:l.toUpperCase()).join(" ")}</button>
+    <p class="mnote">${esc(syncDiag())}</p>
+    ${cloud&&cloud.user?`<button type="button" data-mgo="resync">${ico("lang")}${t("resync")}</button>`:""}
     ${standalone()?"":`<button type="button" data-mgo="install">${ico("install")}${t("install")}</button>`}
     ${note?`<p class="mnote">${esc(note)}</p>`:""}</div></div>`;
   $("moreScrim").onclick=e=>{if(e.target.id==="moreScrim"){closeMore();return}const b=e.target.closest("[data-mgo]");if(!b)return;const k=b.dataset.mgo;
     if(MORE.includes(k))goTab(k);
     else if(k==="settings"){closeMore();openSettings()}
     else if(k==="export"){closeMore();openXfer("export")}
+    else if(k==="resync"){if(cloud&&cloud.ref){cloud.joined=true;save();cloud.ref.get({source:"server"}).then(sn=>{if(sn.exists){const local=S;S=normalize(sn.data().state);mergeState(local);ls.set(KEY,JSON.stringify(S));save();renderAll()}toast(t("resyncOk"))}).catch(e=>{cloud.lastErr="get: "+(e&&e.code||e);toast(t("syncErrMsg")+" ("+(e&&e.code||"?")+")")})}closeMore()}
     else if(k==="import"){closeMore();openXfer("import")}
     else if(k==="lang"){lang={fr:"es",es:"en",en:"fr"}[lang]||"fr";ls.set("ow-lang2",lang);renderAll();openMore()}
     else if(k==="install"){if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;closeMore()})}else openMore(isIOS()?t("installIOS"):t("installOther"))}};
+}
+function syncDiag(){
+  if(!FIREBASE_CONFIG)return t("syncLocal");
+  const u=cloud&&cloud.user;const parts=[u?t("diagAs",u.email||"?"):t("diagNo")];
+  if(cloud&&cloud.lastSnap)parts.push(t("diagSnap",ago(cloud.lastSnap),cloud.lastBy||"?"));
+  if(cloud&&cloud.lastWrite)parts.push(t("diagWrite",ago(cloud.lastWrite)));
+  if(cloud&&cloud.lastErr)parts.push(t("diagErr",cloud.lastErr));
+  if(inApp())parts.push(t("inAppMsg"));
+  return parts.join(" · ");
 }
 function closeMore(){$("moreRoot").innerHTML=""}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("moreRoot").innerHTML)closeMore()});
@@ -1689,7 +1705,8 @@ function openSettings(){
       <label class="field" style="grid-column:1/-1">${t("whenL")}<input id="sW" value="${esc(s.when||"")}" placeholder="${esc(t("whenPh"))}"></label>
       <label class="field" style="grid-column:1/-1">${t("place")}<input id="sP" value="${esc(s.place||"")}"></label>
     </div>
-    <div class="acts" style="justify-content:flex-start"><button type="button" class="ghost" id="sExp">${t("shareData")}</button><button type="button" class="ghost" id="sImp">${t("getData")}</button></div>
+    <p class="sub" style="margin:14px 0 0;font-size:13px">${esc(syncDiag())}</p>
+    <div class="acts" style="justify-content:flex-start">${cloud&&cloud.user?`<button type="button" class="ghost" id="sSync">${t("resync")}</button>`:FIREBASE_CONFIG&&!inApp()?`<button type="button" class="ghost" id="sLogin">${t("syncBtn")}</button>`:""}<button type="button" class="ghost" id="sExp">${t("shareData")}</button><button type="button" class="ghost" id="sImp">${t("getData")}</button></div>
     <div class="acts"><button type="button" class="danger" id="sReset">${t("reset")}</button><span id="sConfirm" hidden>${t("resetQ")} <button type="button" class="ghost" id="sYes">${t("resetYes")}</button></span>
       <button type="button" class="ghost" id="sClose">${t("close")}</button><button class="primary">${t("save")}</button></div>
   </form></div>`;
@@ -1699,7 +1716,9 @@ function openSettings(){
   $("sClose").onclick=close;
   $("scrim").onkeydown=e=>{if(e.key==="Escape")close()};
   $("sReset").onclick=()=>{$("sConfirm").hidden=false};
-  $("sExp").onclick=()=>{close();openXfer("export")};$("sImp").onclick=()=>{close();openXfer("import")};
+  $("sExp").onclick=()=>{close();openXfer("export")};
+  if($("sSync"))$("sSync").onclick=()=>{close();openMore();const r=document.querySelector('[data-mgo="resync"]');if(r)r.click()};
+  if($("sLogin"))$("sLogin").onclick=()=>{close();cloud&&cloud.signIn&&cloud.signIn()};$("sImp").onclick=()=>{close();openXfer("import")};
   $("sYes").onclick=()=>{const keep=S.settings;S=seed();S.settings=keep;["guests","vendors","ideas","day"].forEach(k=>S[k]=[]);close();commit()};
   $("setForm").onsubmit=e=>{e.preventDefault();
     S.settings=Object.assign({},S.settings,{a:Object.assign({},S.settings.a,{name:$("sNa").value.trim()||"A"}),b:Object.assign({},S.settings.b,{name:$("sNb").value.trim()||"B"}),when:$("sW").value.trim(),place:$("sP").value.trim()});
@@ -1751,12 +1770,13 @@ async function initCloud(){
       cloud.ref.onSnapshot(snap=>{
         if(snap.metadata.hasPendingWrites)return;
         if(!snap.exists){cloud.joined=true;save();setSync("on");softRender();return}
-        const remote=normalize(snap.data().state);
+        const dd=snap.data();cloud.lastSnap=Date.now();cloud.lastBy=dd.by||"";cloud.lastUpd=dd.updated||0;
+        const remote=normalize(dd.state);
         if(!cloud.joined){cloud.joined=true;const local=S;S=remote;const n=mergeState(local);ls.set(KEY,JSON.stringify(S));if(n)save();renderAll();setSync("on");return}
         S=remote;ls.set(KEY,JSON.stringify(S));softRender();setSync("on");
         const h=S.hugs.last;const seen=+ls.get("ow-hugseen")||0;
         
-      },()=>setSync("err"));
+      },e=>{cloud.lastErr="read: "+(e&&e.code||e);setSync("err");toast(t("syncErrMsg")+" ("+(e&&e.code||"?")+")")});
     });
   }catch(err){setSync("err")}
 }
