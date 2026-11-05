@@ -98,7 +98,9 @@ button{cursor:pointer}
 .music{margin:6px 0 30px}
 .vwrap{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 10px 30px rgba(43,26,46,.18)}
 .vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.vlink{display:inline-block;margin-top:10px;font-size:.92rem;color:inherit;opacity:.75}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.vt{margin:10px 0 0;font-weight:600}
+.vlink{display:inline-block;margin-top:4px;font-size:.92rem;color:inherit;opacity:.75}
 .prio .head{align-items:center}
 .plist{list-style:none;margin:0;padding:0;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .plist li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);animation:fade .3s ease}
@@ -656,8 +658,12 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
     <section class="music">
       <div class="head"><h2 data-i18n="musicT"></h2></div>
       <p class="sub" data-i18n="musicS"></p>
-      <div class="vwrap"><iframe src="https://www.youtube-nocookie.com/embed/lBjz1NaqATs" title="A Love Written by God · Christian Wedding Playlist" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <a class="vlink" href="https://youtu.be/lBjz1NaqATs" target="_blank" rel="noopener" data-i18n="musicOpen"></a>
+      <div class="vgrid">
+        <div><div class="vwrap"><iframe src="https://www.youtube-nocookie.com/embed/lBjz1NaqATs" title="A Love Written by God · Christian Wedding Playlist" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <p class="vt">A Love Written by God</p><a class="vlink" href="https://youtu.be/lBjz1NaqATs" target="_blank" rel="noopener" data-i18n="musicOpen"></a></div>
+        <div><div class="vwrap"><iframe src="https://www.youtube-nocookie.com/embed/TSrzifH9M58" title="Somos Dios, Tú y Yo · Canción Cristiana de Boda" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <p class="vt">Somos Dios, Tú y Yo</p><a class="vlink" href="https://youtu.be/TSrzifH9M58" target="_blank" rel="noopener" data-i18n="musicOpen"></a></div>
+      </div>
     </section>
     <div class="cols">
       <div class="box"><h3 data-i18n="nextUp"></h3><div id="nextList"></div></div>
