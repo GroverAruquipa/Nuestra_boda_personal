@@ -95,6 +95,10 @@ button{cursor:pointer}
 .note .nm2{font-size:12px;color:var(--muted);margin-top:auto;padding-top:4px}
 /* priorities */
 .prio{margin:6px 0 30px}
+.music{margin:6px 0 30px}
+.vwrap{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 10px 30px rgba(43,26,46,.18)}
+.vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vlink{display:inline-block;margin-top:10px;font-size:.92rem;color:inherit;opacity:.75}
 .prio .head{align-items:center}
 .plist{list-style:none;margin:0;padding:0;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .plist li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);animation:fade .3s ease}
@@ -649,6 +653,12 @@ footer .s{font-family:var(--script);font-size:26px;color:var(--rose);display:blo
       <p class="sub" data-i18n="keepS"></p>
       <div class="notes" id="notes"></div>
     </section>
+    <section class="music">
+      <div class="head"><h2 data-i18n="musicT"></h2></div>
+      <p class="sub" data-i18n="musicS"></p>
+      <div class="vwrap"><iframe src="https://www.youtube-nocookie.com/embed/lBjz1NaqATs" title="A Love Written by God · Christian Wedding Playlist" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <a class="vlink" href="https://youtu.be/lBjz1NaqATs" target="_blank" rel="noopener" data-i18n="musicOpen"></a>
+    </section>
     <div class="cols">
       <div class="box"><h3 data-i18n="nextUp"></h3><div id="nextList"></div></div>
       <div class="box"><h3 data-i18n="news"></h3><ul class="feed" id="feed"></ul></div>
@@ -904,17 +914,17 @@ prioT:"Nuestras prioridades",prioS:"En el orden en que queremos avanzar. Toca el
 Object.assign(T.en,{map:"Our map",mapT:"Our idea map",mapS:"Everything we drew together. Tap a theme to see its ideas. Tap an idea to change it, and its label to change its status.",addBranch:"+ New theme",center:"Wedding",st_idea:"Idea",st_q:"To discuss",st_ok:"Decided",ideaAddPh:"New idea…",delBranch:"Delete this theme",delBranchQ:"Yes, delete the theme",branchPh:"Theme name",
 prioT:"Our priorities",prioS:"In the order we want to move forward. Tap the number when it's done, and the arrows to change the order.",addPrio:"+ Add",up:"Move up",down:"Move down"});
 Object.assign(T.fr,{keepT:"À retenir",keepS:"Ce qui compte, au même endroit. Touchez n'importe quel texte pour le modifier ou le compléter.",addNote:"+ Ajouter une note",notePh:"Écrivez ici…",noteTitlePh:"Titre",edited:"Modifié par {0}, {1}",hugLast:"Dernier câlin : {0}, {1}",whenL:"Quand",whenPh:"Par exemple : entre juin et juillet 2027",
-nextUp:"Prochaines petites étapes",foot:"Fait avec amour, pour nous deux.",
+nextUp:"Prochaines petites étapes",musicT:"Notre musique",musicS:"Une playlist pour rêver à la cérémonie et choisir nos chansons.",musicOpen:"Ouvrir dans YouTube ↗",foot:"Fait avec amour, pour nous deux.",
 tasksS:"Tout ce qu'il faut décider, sans se presser. Touchez un texte pour le modifier, et le cercle d'une personne pour changer qui s'en occupe.",
 guestsS:"Touchez un nom pour le modifier, et le statut pour le changer : en attente, oui, non.",vendorsS:"Touchez un texte pour le modifier. Les flèches font avancer chaque fournisseur, étape par étape.",
 ideasS:"Lancez des idées, gardez des liens et posez-vous des questions. Touchez un texte pour le modifier.",dayS:"Le déroulement du jour du mariage. Touchez une heure ou un texte pour le modifier."});
 Object.assign(T.es,{keepT:"Lo importante",keepS:"Lo que importa, en un solo lugar. Toca cualquier texto para cambiarlo o completarlo.",addNote:"+ Añadir una nota",notePh:"Escribe aquí…",noteTitlePh:"Título",edited:"Cambiado por {0}, {1}",hugLast:"Último abrazo: {0}, {1}",whenL:"Cuándo",whenPh:"Por ejemplo: entre junio y julio de 2027",
-nextUp:"Próximos pasitos",foot:"Hecho con amor, para los dos.",
+nextUp:"Próximos pasitos",musicT:"Nuestra música",musicS:"Una playlist para soñar con la ceremonia y elegir nuestras canciones.",musicOpen:"Abrir en YouTube ↗",foot:"Hecho con amor, para los dos.",
 tasksS:"Todo lo que hay que decidir, sin prisa. Toca un texto para cambiarlo, y el círculo de una persona para cambiar quién se encarga.",
 guestsS:"Toca un nombre para cambiarlo, y el estado para cambiarlo: pendiente, sí, no.",vendorsS:"Toca un texto para cambiarlo. Las flechas mueven cada proveedor de etapa.",
 ideasS:"Lancen ideas, guarden enlaces y háganse preguntas. Toca un texto para cambiarlo.",dayS:"El cronograma del día de la boda. Toca una hora o un texto para cambiarlo."});
 Object.assign(T.en,{keepT:"Worth remembering",keepS:"What matters, in one place. Tap any text to change or add to it.",addNote:"+ Add a note",notePh:"Write here…",noteTitlePh:"Title",edited:"Edited by {0}, {1}",hugLast:"Last hug: {0}, {1}",whenL:"When",whenPh:"For example: between June and July 2027",
-nextUp:"Next small steps",foot:"Made with love, for the two of us.",
+nextUp:"Next small steps",musicT:"Our music",musicS:"A playlist to dream about the ceremony and pick our songs.",musicOpen:"Open in YouTube ↗",foot:"Made with love, for the two of us.",
 tasksS:"Everything to decide, with no rush. Tap a text to change it, and a person's circle to change who's in charge.",
 guestsS:"Tap a name to change it, and the status to switch it: pending, yes, no.",vendorsS:"Tap a text to change it. The arrows move each vendor to the next stage.",
 ideasS:"Share ideas, save links and ask each other questions. Tap a text to change it.",dayS:"The wedding-day timeline. Tap a time or a text to change it."});
